@@ -140,3 +140,54 @@ impl EncodeTrait for Bob {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use rand::Rng;
+
+    #[test]
+    fn test_cyclic_shift() {
+        let mut deck = Deck {
+            cards: vec![
+                Card::Queen,
+                Card::King,
+                Card::Queen,
+                Card::King,
+                Card::Queen,
+            ],
+        };
+
+        deck.cyclic_shift(2);
+
+        assert_eq!(
+            deck,
+            Deck {
+                cards: vec![
+                    Card::Queen,
+                    Card::King,
+                    Card::Queen,
+                    Card::Queen,
+                    Card::King
+                ],
+            }
+        );
+    }
+
+    #[test]
+    fn test_game_simulation() {
+        let alice = Alice { secret: true };
+        let bob = Bob { secret: false };
+
+        let alice_deck = alice.encode();
+        let bob_deck = bob.encode();
+
+        let mut joined_deck = alice_deck.join(&bob_deck);
+
+        let mut rng = rand::thread_rng();
+        joined_deck.cyclic_shift(rng.gen_range(0..5));
+        joined_deck.cyclic_shift(rng.gen_range(0..5));
+
+        assert_eq!(joined_deck.decode(), false);
+    }
+}
