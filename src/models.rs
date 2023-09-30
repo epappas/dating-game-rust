@@ -1,10 +1,10 @@
 #[derive(Debug, PartialEq, Clone)]
 pub enum Card {
-    Queen(u8),
-    King(u8),
+    Queen,
+    King,
 }
 
-#[derive(Debug, Default, PartialEq)]
+#[derive(Clone, Debug, Default, PartialEq)]
 pub struct Deck {
     pub cards: Vec<Card>,
 }
@@ -25,7 +25,7 @@ pub trait JoinTrait {
 /// return a deck with the cards rotated
 /// to the left by shift.
 pub trait CyclicShiftTrait {
-    fn cyclic_shift(&self, shift: usize) -> Deck;
+    fn cyclic_shift(&mut self, shift: usize);
 }
 
 /// # Deck::decode.
@@ -47,7 +47,7 @@ impl JoinTrait for Deck {
         let mut cards = Vec::new();
 
         cards.extend(self.cards.clone());
-        cards.push(Card::King(0));
+        cards.push(Card::King);
         cards.extend(other.cards.clone());
 
         Deck { cards }
@@ -56,18 +56,10 @@ impl JoinTrait for Deck {
 
 /// Implement Deck::cyclic_shift.
 impl CyclicShiftTrait for Deck {
-    fn cyclic_shift(&self, shift: usize) -> Deck {
-        let mut cards = Vec::new();
+    fn cyclic_shift(&mut self, shift: usize) {
+        assert_eq!(self.cards.len(), 5);
 
-        for i in shift..self.cards.len() {
-            cards.push(self.cards[i].clone());
-        }
-
-        for i in 0..shift {
-            cards.push(self.cards[i].clone());
-        }
-
-        Deck { cards }
+        self.cards.rotate_left(shift % 5);
     }
 }
 
@@ -76,7 +68,7 @@ impl DecodeTrait for Deck {
     fn decode(&self) -> bool {
         let mut count = 0;
         for i in 0..self.cards.len() {
-            if let Card::King(_) = self.cards[i] {
+            if let Card::King = self.cards[i] {
                 count += 1;
             } else {
                 count = 0;
@@ -102,7 +94,7 @@ impl DecodeTrait for Deck {
 /// | Bob | King,Queen | Queen,King |
 ///
 pub trait EncodeTrait {
-    fn encode(&self, input: bool) -> Deck;
+    fn encode(&self) -> Deck;
 }
 
 #[derive(Debug, Default, PartialEq)]
@@ -120,16 +112,15 @@ pub struct Bob {
 /// The only function needed is encode,
 /// in which we accept a Boolean input and output a deck.
 impl EncodeTrait for Alice {
-    fn encode(&self, input: bool) -> Deck {
-        let mut cards = Vec::new();
-        if input {
-            cards.push(Card::Queen(0));
-            cards.push(Card::King(0));
-        } else {
-            cards.push(Card::King(0));
-            cards.push(Card::Queen(0));
+    fn encode(&self) -> Deck {
+        match self.secret {
+            true => Deck {
+                cards: vec![Card::Queen, Card::King],
+            },
+            false => Deck {
+                cards: vec![Card::King, Card::Queen],
+            },
         }
-        Deck { cards }
     }
 }
 
@@ -138,15 +129,14 @@ impl EncodeTrait for Alice {
 /// The only function needed is encode,
 /// in which we accept a Boolean input and output a deck.
 impl EncodeTrait for Bob {
-    fn encode(&self, input: bool) -> Deck {
-        let mut cards = Vec::new();
-        if input {
-            cards.push(Card::King(0));
-            cards.push(Card::Queen(0));
-        } else {
-            cards.push(Card::Queen(0));
-            cards.push(Card::King(0));
+    fn encode(&self) -> Deck {
+        match self.secret {
+            true => Deck {
+                cards: vec![Card::King, Card::Queen],
+            },
+            false => Deck {
+                cards: vec![Card::Queen, Card::King],
+            },
         }
-        Deck { cards }
     }
 }
