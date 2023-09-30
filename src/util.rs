@@ -15,8 +15,8 @@ fn find_match(deck: &mut Deck, alice: Alice, bob: Bob) -> bool {
     deck.cards.swap(alice_mark, bob_mark);
 
     // Check for marked card
-    let alice_found = deck.cards[alice_mark] == Card::Heart(0); // Assuming Heart(0) is the marked card
-    let bob_found = deck.cards[bob_mark] == Card::Heart(0);
+    let alice_found = deck.cards[alice_mark] == Card::Queen(0); // Assuming Queen(0) is the marked card
+    let bob_found = deck.cards[bob_mark] == Card::Queen(0);
 
     alice_found && bob_found
 }
@@ -33,12 +33,7 @@ mod tests {
     #[test]
     fn test_find_match() {
         let mut deck = Deck {
-            cards: vec![
-                Card::Heart(0),
-                Card::Diamond(1),
-                Card::Spade(0),
-                Card::Club(1),
-            ],
+            cards: vec![Card::Queen(0), Card::King(0)],
         };
 
         let alice = Alice { secret: true }; // Alice wants to date
